@@ -77,4 +77,26 @@ task helloWorld(){
             }
         }
     }
+    tasks.named("task1"){
+           dependsOn "task4","task6","task8"
+    }
+    dependsOn "task1"
+}
+
+task copyApk(type: Copy , dependsOn:"test"){
+    def sourceDest = layout.buildDirectory.dir("outputs/apk/freeMinSdk30/debug/app-free-minSdk30-debug.apk")
+    def dirDest = "$rootDir/apk"
+    from sourceDest
+    into dirDest
+    rename "app-free-minSdk30-debug.apk","gradle-test.apk"
+    doLast {
+        def file = new File(dirDest , "gradle-test.apk")
+        ant.checksum file:file.path
+    }
+}
+
+tasks.whenTaskAdded {task->
+    if(task.name == "assembleDebug"){
+        task.finalizedBy "copyApk"
+    }
 }
